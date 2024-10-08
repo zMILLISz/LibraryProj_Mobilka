@@ -1,5 +1,7 @@
+package org.example;
+
 public class Book {
-    private int id; // Добавляем поле id
+    private int id;
     private String title;
     private String author;
     private String year;
@@ -10,12 +12,10 @@ public class Book {
         this.year = year;
     }
 
-    // Геттер для id
     public int getId() {
         return id;
     }
 
-    // Сеттер для id
     public void setId(int id) {
         this.id = id;
     }

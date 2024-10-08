@@ -1,12 +1,14 @@
+package org.example;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Library {
+    public static final String url = "jdbc:postgresql://localhost:9000/Books";
+    public static final String DB_DRIVER = "org.postgresql.Driver";
+
     private Connection connect() {
-        // Замените данные подключения на ваши
-        String url = "jdbc:postgresql://localhost:9000/postgres";
-        String DB_DRIVER = "org.postgresql.Driver";
         String user = "postgres";
         String password = "1qaz!QAZ";
         Connection conn = null;
@@ -22,9 +24,11 @@ public class Library {
     }
 
     public void addBook(String title, String author, int year) {
-        String sql = "INSERT INTO \"books\" (title, author, year) VALUES ('"+title+"', '"+author+"', '"+year+"')";
+        String sql = "INSERT INTO \"books\" (title, author, year) VALUES (?, ?, ?)";
+
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setString(1, title);
             pstmt.setString(2, author);
             pstmt.setInt(3, year);
@@ -36,23 +40,21 @@ public class Library {
     }
 
     public List<Book> viewBooks() {
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT * FROM \"books\"";
 
-        List<Book> books = new ArrayList<Book>();
         try (Connection conn = connect();
              Statement stmt = conn.createStatement();
-             ) {
-            String sql = "SELECT * FROM \"books\"";
-            ResultSet rs = stmt.executeQuery(sql);
-            while (rs.next()) {
-                //System.out.println(rs.getString(2));
+             ResultSet rs = stmt.executeQuery(sql)) {
 
-                int id = rs.getInt(1);
+            while (rs.next()) {
+                int id = rs.getInt(1); //
                 String title = rs.getString(2);
                 String author = rs.getString(3);
-                String year = rs.getString(4);
-                books.add(new Book(title, author, year));
-                //books.get(books.size() - 1).setId(id); // Установка ID
-
+                int year = rs.getInt(4);
+                Book book = new Book(title, author, String.valueOf(year));
+                book.setId(id);
+                books.add(book);
             }
 
         } catch (SQLException e) {
@@ -63,8 +65,10 @@ public class Library {
 
     public void updateBook(int id, String title, String author, int year) {
         String sql = "UPDATE \"books\" SET title = ?, author = ?, year = ? WHERE id = ?";
+
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setString(1, title);
             pstmt.setString(2, author);
             pstmt.setInt(3, year);
@@ -78,8 +82,10 @@ public class Library {
 
     public void deleteBook(int id) {
         String sql = "DELETE FROM \"books\" WHERE id = ?";
+
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
             System.out.println("Книга удалена: ID " + id);
